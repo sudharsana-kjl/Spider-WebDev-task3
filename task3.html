@@ -5,16 +5,79 @@
 		<style>
 		#game {
 	background-color: #353535;
-}
+   }
+   #start{float: left;
+   	margin-left: 900px;
+	margin-top: -400px;
+	 background-color: #ffff99; 
+    color: black; 
+    border: 2px solid #ff471a;
+    width: 100px;
+    height: 50px;
+    font-size: 1.5em;
+   }
+   #start:hover {
+   	background-color: #ff471a;
+    color: white;
+    font-size: 1.5em;
+   }
+   #pause{
+   	float: left;
+   	margin-left: 900px;
+	margin-top: -300px;
+	 background-color: #ffff99; 
+    color: black; 
+    border: 2px solid #ff471a;
+    width: 100px;
+    height: 50px;
+    font-size: 1.5em;
+   }
+   #pause:hover {
+   	background-color: #ff471a;
+    color: white;
+    font-size: 1.5em;
+   }
+   #resume{
+   	float: left;
+   	margin-left: 1050px;
+	margin-top: -300px;
+	 background-color: #ffff99; 
+    color: black; 
+    border: 2px solid #ff471a;
+    width: 100px;
+    height: 50px;
+    font-size: 1.5em;
+   }
+   #resume:hover {
+   	background-color: #ff471a;
+    color: white;
+    font-size: 1.5em;
+   }
+   #over{
+   	margin-left: 900px;
+	margin-top: -200px;
+	font-size: 3em;
+	visibility: hidden;
+   }
+
 		</style>
 		
 	</head>
 	<body>
+
 		<canvas id="game" width="850" height="500"></canvas>
+		<button id="start" onclick="start()">Start</button>
+		<button id="pause" onclick="pause()">Pause</button>
+		<button id="resume" onclick="resume()">Resume</button> 
+		<div id="over">Game Over!!</div>
 		<script>
+		var scr1 =0 ;
+		var scr2 =0;
+		var timeinterval;
+		var canvas = document.getElementById("game");
 		var game = new Game();
 		function Game() {
-			var canvas = document.getElementById("game");
+			
 			this.width = canvas.width;
 			this.height = canvas.height;
 			this.context = canvas.getContext("2d");
@@ -23,14 +86,14 @@
 			this.p1 = new Paddle(5, 0);
 			this.p1.y = this.height/2 - this.p1.height/2;
 			this.display1 = new Display(this.width/4, 25);
-			this.p2 = new Paddle(this.width - 20, 0);
+			this.p2 = new Paddle(this.width - 15, 0);
 			this.p2.y = this.height/2 - this.p2.height/2;
 			this.display2 = new Display(this.width*3/4, 25);
 			this.ball = new Ball();
 			this.ball.x = this.width/2;
 			this.ball.y = this.height/2;
-			this.ball.vy = Math.floor(Math.random()*12 - 6);
-			this.ball.vx = 7 - Math.abs(this.ball.vy);
+			this.ball.vy = 5;//Math.floor(Math.random()*12 - 6);
+			this.ball.vx = 5;//7 - Math.abs(this.ball.vy);
 		}
 		Game.prototype.draw = function()
 		{
@@ -60,8 +123,11 @@
 			}
 			this.ball.update();
 			if (this.ball.x > this.width || this.ball.x + this.ball.width < 0) {
-				this.ball.vx = -this.ball.vx;
+				game.paused;
+				gameover();
+				//alert("game over");
 			} else if (this.ball.y > this.height || this.ball.y + this.ball.height < 0) {
+				
 				this.ball.vy = -this.ball.vy;
 			}
 			if (this.ball.vx > 0) {
@@ -72,6 +138,9 @@
 					var y = this.ball.vy*k + (this.ball.y - this.ball.vy);
 					if (y >= this.p2.y && y + this.ball.height <= this.p2.y + this.p2.height) {
 						// collides with right paddle
+						this.score(this.p2);
+						scr2++;
+						
 						this.ball.x = this.p2.x - this.ball.width;
 						this.ball.y = Math.floor(this.ball.y - this.ball.vy + this.ball.vy*k);
 						this.ball.vx = -this.ball.vx;
@@ -80,10 +149,14 @@
 			} else {
 				if (this.p1.x + this.p1.width >= this.ball.x) {
 					var collisionDiff = this.p1.x + this.p1.width - this.ball.x;
-					var k = collisionDiff/-this.ball.vx;
+					var k = collisionDiff/this.ball.vx;
 					var y = this.ball.vy*k + (this.ball.y - this.ball.vy);
 					if (y >= this.p1.y && y + this.ball.height <= this.p1.y + this.p1.height) {
 						// collides with the left paddle
+						
+						this.score(this.p1);
+						scr1++;
+						
 						this.ball.x = this.p1.x + this.p1.width;
 						this.ball.y = Math.floor(this.ball.y - this.ball.vy + this.ball.vy*k);
 						this.ball.vx = -this.ball.vx;
@@ -95,10 +168,10 @@
 					(this.ball.vy > 0 && this.ball.y + this.ball.height > this.height)) {
 				this.ball.vy = -this.ball.vy;
 			}
-			if (this.ball.x >= this.width)
+			/*if (this.ball.x >= this.width)
 				this.score(this.p1);
 			else if (this.ball.x + this.ball.width <= 0)
-				this.score(this.p2);
+				this.score(this.p2);*/
 			this.display1.value = this.p1.score;
 			this.display2.value = this.p2.score;
 		};
@@ -106,18 +179,22 @@
 		{
 			// player scores
 			p.score++;
-			var player = p == this.p1 ? 0 : 1;
+			var player = p == this.p1 ? 1 : 0;
 		 
 			// set ball position
 			this.ball.x = this.width/2;
 			this.ball.y = p.y + p.height/2;
 		 
 			// set ball velocity
-			this.ball.vy = Math.floor(Math.random()*12 - 6);
-			this.ball.vx = 7 - Math.abs(this.ball.vy);
+			this.ball.vy = 5;//Math.floor(Math.random()*10);
+			this.ball.vx = 5;//14 - Math.abs(this.ball.vy);
 			if (player == 1)
 				this.ball.vx *= -1;
 		};
+		Game.prototype.start = function(){
+
+			MainLoop();
+		}
 		function Display(x, y) {
 			this.x = x;
 			this.y = y;
@@ -134,7 +211,7 @@
 			game.update();
 			game.draw();
 			// Call the main loop again at a frame rate of 30fps
-			setTimeout(MainLoop, 30);
+			timeinterval = setTimeout(MainLoop, 30);
 		}
 		function Paddle(x,y) {
 			this.x = x;
@@ -191,9 +268,33 @@
 		{
 			p.fillRect(this.x, this.y, this.width, this.height);
 		};
-		// Start the game execution
-		MainLoop();
+		
+		
+			
+			//game.start();
+			//MainLoop();
 
+		
+		function start(){
+
+			game.start();
+		}
+		function gameover(){
+           clearTimeout(timeinterval);
+           document.getElementById("over").style.visibility = "visible";
+           
+		}
+		function pause(){
+            clearTimeout(timeinterval);
+		}
+		function resume(){
+               MainLoop();
+
+		}
+		// Start the game execution
+		
+    
+       
 		</script>
 	</body>
 </html>
