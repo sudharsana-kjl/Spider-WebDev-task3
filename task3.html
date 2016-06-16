@@ -21,6 +21,22 @@
     color: white;
     font-size: 1.5em;
    }
+   #restart{float: left;
+   	margin-left: 900px;
+	margin-top: -400px;
+	 background-color: #ffff99; 
+    color: black; 
+    border: 2px solid #ff471a;
+    width: 150px;
+    height: 50px;
+    font-size: 1.5em;
+    visibility: hidden;
+   }
+   #restart:hover {
+   	background-color: #ff471a;
+    color: white;
+    font-size: 1.5em;
+   }
    #pause{
    	float: left;
    	margin-left: 900px;
@@ -47,6 +63,7 @@
     width: 100px;
     height: 50px;
     font-size: 1.5em;
+    
    }
    #resume:hover {
    	background-color: #ff471a;
@@ -68,7 +85,8 @@
 		<canvas id="game" width="850" height="500"></canvas>
 		<button id="start" onclick="start()">Start</button>
 		<button id="pause" onclick="pause()">Pause</button>
-		<button id="resume" onclick="resume()">Resume</button> 
+		<button id="resume" onclick="resume()">Resume</button>
+		<button id="restart" onclick="restart()">Play Again?</button> 
 		<div id="over">Game Over!!</div>
 		<script>
 		var scr1 =0 ;
@@ -76,6 +94,9 @@
 		var timeinterval;
 		var canvas = document.getElementById("game");
 		var game = new Game();
+		var game1 = new Game();
+		var mysound = new sound("pingpong.mp3");
+		var oversound = new sound("over.mp3");
 		function Game() {
 			
 			this.width = canvas.width;
@@ -138,6 +159,7 @@
 					var y = this.ball.vy*k + (this.ball.y - this.ball.vy);
 					if (y >= this.p2.y && y + this.ball.height <= this.p2.y + this.p2.height) {
 						// collides with right paddle
+						mysound.play();
 						this.score(this.p2);
 						scr2++;
 						
@@ -153,7 +175,7 @@
 					var y = this.ball.vy*k + (this.ball.y - this.ball.vy);
 					if (y >= this.p1.y && y + this.ball.height <= this.p1.y + this.p1.height) {
 						// collides with the left paddle
-						
+						mysound.play();
 						this.score(this.p1);
 						scr1++;
 						
@@ -203,7 +225,7 @@
  
 		Display.prototype.draw = function(p)
 		{    p.font = "30px Arial";
-			p.fillText(this.value, this.x, this.y);
+			p.fillText("Score: "+this.value, this.x, this.y);
 		};
 
  
@@ -279,9 +301,19 @@
 
 			game.start();
 		}
+		function restart(){
+			location.reload();
+			//game1.start();
+		}
 		function gameover(){
            clearTimeout(timeinterval);
+           oversound.play();
            document.getElementById("over").style.visibility = "visible";
+           document.getElementById("start").style.visibility = "hidden";
+           document.getElementById("pause").style.visibility = "hidden";
+           document.getElementById("resume").style.visibility = "hidden";
+           document.getElementById("restart").style.visibility = "visible";
+
            
 		}
 		function pause(){
@@ -291,6 +323,20 @@
                MainLoop();
 
 		}
+		function sound(src) {
+    this.sound = document.createElement("audio");
+    this.sound.src = src;
+    this.sound.setAttribute("preload", "auto");
+    this.sound.setAttribute("controls", "none");
+    this.sound.style.display = "none";
+    document.body.appendChild(this.sound);
+    this.play = function(){
+        this.sound.play();
+    }
+    this.stop = function(){
+        this.sound.pause();
+    }
+}  
 		// Start the game execution
 		
     
